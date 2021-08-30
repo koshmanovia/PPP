@@ -1,0 +1,7 @@
+C:\MyProg\VS\projects\PPP\PingerPetProject\bin\Debug\PingerPetProject.exe.config
+C:\MyProg\VS\projects\PPP\PingerPetProject\bin\Debug\PingerPetProject.exe
+C:\MyProg\VS\projects\PPP\PingerPetProject\bin\Debug\PingerPetProject.pdb
+C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.csproj.AssemblyReference.cache
+C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.csproj.CoreCompileInputs.cache
+C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.exe
+C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.pdb

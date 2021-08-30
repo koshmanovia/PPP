@@ -14,11 +14,10 @@ namespace Pinger
     {
         static void Main(string[] args)
         {
-            InputHostNameTMP test = new InputHostNameTMP();  //rename!           
+            ConsolePinger test = new ConsolePinger();
             int inputHostTimeoute = 3000;
-            //горизонтальное выравнивание сделать<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
             test.InputHostData();
-            int windowHeightNum = test.getListHost().Count() + 2;
+            int windowHeightNum = test.getListHost().Count() + 5;
             if (windowHeightNum < 64)
                 Console.WindowHeight = windowHeightNum;
             else
@@ -36,73 +35,117 @@ namespace Pinger
         public void CreateTableHost(List<Host> addressHost, int timeoutHost)
         {
             Ping Pinger = new Ping();
-            String ipAddress = "";
+            PingOptions options = new PingOptions();
+            options.DontFragment = true;
             String HostName = "";
-            String Description = "";
-            long roadTrip = 0;
             List<String> tempHostName = new List<String>();
             List<String> tempIpAddress = new List<String>();
             List<String> tempDescription = new List<String>();
+            List<int> tempQualityHost = new List<int>();
             List<long> tempRoadTrip = new List<long>();
             outputDataPinger line = new outputDataPinger();
+            Console.Clear();
             Console.Write(" \n      Идет обработка доступности адресов, пожалуйста подождите...");
-            for (; ; )
+            for (long iterator = 1; ; iterator++)
             {
 
-                for (int i = 0; i < addressHost.Count; i++)
+                if (NetworkInterface.GetIsNetworkAvailable())
                 {
-                    Host tempListHost = addressHost[i];
-                    HostName = tempListHost.hostName;
-                    try
+
+                    for (int i = 0; i < addressHost.Count; i++)
                     {
-                        PingReply ReplyInputDataHost = Pinger.Send(HostName, timeoutHost);
+                        Host tempListHost = addressHost[i];
+                        HostName = tempListHost.hostName;
                         try
                         {
-                            ipAddress = ReplyInputDataHost.Address.ToString();
-                            roadTrip = ReplyInputDataHost.RoundtripTime;
-                            Description = tempListHost.physLocationHost;
-                            tempHostName.Add(HostName);
-                            tempIpAddress.Add(ipAddress);
-                            tempRoadTrip.Add(roadTrip);
-                            tempDescription.Add(Description);
+                            PingReply ReplyInputDataHost = Pinger.Send(HostName, timeoutHost);
+                            if (ReplyInputDataHost.Status != IPStatus.Success)
+                            {
+                                tempHostName.Add(HostName);
+                                tempIpAddress.Add("not available");
+                                tempRoadTrip.Add(ReplyInputDataHost.RoundtripTime);
+                                tempDescription.Add(tempListHost.physLocationHost);
+                                tempQualityHost.Add(tempListHost.Quality(false));
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    tempHostName.Add(HostName);
+                                    tempIpAddress.Add(ReplyInputDataHost.Address.ToString());
+                                    tempRoadTrip.Add(ReplyInputDataHost.RoundtripTime);
+                                    tempDescription.Add(tempListHost.physLocationHost);
+                                    tempQualityHost.Add(tempListHost.Quality(true));
+                                }
+                                catch (NullReferenceException)
+                                {
+                                    tempHostName.Add(HostName);
+                                    tempIpAddress.Add("not available");
+                                    tempRoadTrip.Add(0);
+                                    tempDescription.Add(tempListHost.physLocationHost);
+                                    tempQualityHost.Add(tempListHost.Quality(false));
+                                }
+                            }
                         }
-                        catch (NullReferenceException)
+                        catch (PingException)
                         {
-                            ipAddress = "not available";
-                            Description = tempListHost.physLocationHost;
-                            roadTrip = 0;
                             tempHostName.Add(HostName);
-                            tempIpAddress.Add(ipAddress);
-                            tempRoadTrip.Add(roadTrip);
-                            tempDescription.Add(Description);
+                            tempIpAddress.Add("HOST NAME ERROR!");
+                            tempRoadTrip.Add(0);
+                            tempDescription.Add(tempListHost.physLocationHost);
+                            tempQualityHost.Add(tempListHost.Quality(false));
                         }
-                    }
-                    catch (PingException)
-                    {
-                        ipAddress = "HOST NAME ERROR!";
-                        Description = tempListHost.physLocationHost;
-                        roadTrip = 0;
+                        catch (ArgumentException)
+                        {
+                            tempHostName.Add(HostName);
+                            tempIpAddress.Add("HOST NAME ERROR!");
+                            tempRoadTrip.Add(0);
+                            tempDescription.Add(tempListHost.physLocationHost);
+                            tempQualityHost.Add(tempListHost.Quality(false));
+                        }
+                        /*//////////////////////////////////////////////////////////////////////
+                        ///  РАЗОБРАТЬСЯ С РАБОТОЙ ИСКЛЮЧЕНИЙ, что и когда перехватывают       
+                        catch (ObjectDisposedException)
+                        {
                         tempHostName.Add(HostName);
-                        tempIpAddress.Add(ipAddress);
-                        tempRoadTrip.Add(roadTrip);
-                        tempDescription.Add(Description);
+                        tempIpAddress.Add("ObjectDisposedException!");
+                        tempRoadTrip.Add(999);
+                        tempDescription.Add(tempListHost.physLocationHost);
+                        tempQualityHost.Add(tempListHost.Quality(false));
+                        }
+                        catch (InvalidOperationException)
+                        {
+                        tempHostName.Add(HostName);
+                        tempIpAddress.Add("InvalidOperationException");
+                        tempRoadTrip.Add(999);
+                        tempDescription.Add(tempListHost.physLocationHost);
+                        tempQualityHost.Add(tempListHost.Quality(false));
+                        }                    
+                        //////////////////////////////////////////////////////////////////*/
                     }
+                    Console.Clear();
+                    line.writeHeadTable();
+                    for (int i = 0; i < addressHost.Count; i++)
+                    {
+                        line.writeTextColor(tempHostName[i], tempIpAddress[i], tempRoadTrip[i], tempDescription[i], tempQualityHost[i]);
+                        //Thread.Sleep(4);
+                    }
+                    tempHostName.Clear();
+                    tempIpAddress.Clear();
+                    tempRoadTrip.Clear();
+                    tempDescription.Clear();
+                    tempQualityHost.Clear();
+                    //Thread.Sleep(250);
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
-                Console.Clear();
-                line.writeHeadTable();
-                //Console.WriteLine();
-                for (int i = 0; i < addressHost.Count; i++)
+                else
                 {
-                    line.writeTextColor(tempHostName[i], tempIpAddress[i], tempRoadTrip[i], tempDescription[i]);
-                    // Console.WriteLine();
-                    Thread.Sleep(4);
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.Clear();
+                    Console.WriteLine(" \n \n \n \n \n \n             Связи нет! \n      ПРОВЕРЬТЕ СЕТЕВОЕ ПОДКЛЮЧЕНИЕ!pin");
                 }
-                tempHostName.Clear();
-                tempIpAddress.Clear();
-                tempRoadTrip.Clear();
-                Thread.Sleep(300);
-                Console.ForegroundColor = ConsoleColor.Black;
-
+                Console.WriteLine("\nКоличество итераций = " + iterator);
+                Thread.Sleep(1500);
             }
         }
     }
@@ -111,27 +154,63 @@ namespace Pinger
         public string hostName { get; set; }
         public byte pingIterator { get; set; }
         public bool hostStatus { get; set; }
-        public byte qualityLinkHost { get; set; }
-        public short breaksNumHost { get; set; }
+        public int qualityLinkHost { get; set; }
         public string physLocationHost { get; set; }
+        List<bool> QualityArray = new List<bool>();
+        int maxSizeArrayQuality = 0;
+        bool triggerFullArray = false;
 
-        private short BreaksNumHost
-        {
-            get => breaksNumHost;
-            set
-            {
-                if (breaksNumHost < 1000)
-                    breaksNumHost = value;
-            }
-        }
+
         public Host(string name, string physLocation)
         {
             hostName = name;
             pingIterator = 0;
             hostStatus = true;
-            qualityLinkHost = 100;
-            breaksNumHost = 0;
             physLocationHost = physLocation;
+            qualityLinkHost = 0;
+        }
+        public int Quality(bool hostStatus)
+        {
+            double LinkTrue = 0;
+            double LinkTrueTemp = 0;
+
+            if (triggerFullArray == true)
+            {
+                if (maxSizeArrayQuality < 1000)
+                {
+                    QualityArray[maxSizeArrayQuality] = hostStatus;
+                }
+                if (maxSizeArrayQuality == 1000)
+                {
+                    QualityArray[maxSizeArrayQuality] = hostStatus;
+                    maxSizeArrayQuality = -1;
+                }
+            }
+            if (triggerFullArray == false)
+            {
+                if (QualityArray.Count < 1000)
+                {
+                    QualityArray.Add(hostStatus);
+                }
+                if (QualityArray.Count == 1000)
+                {
+                    triggerFullArray = true;
+                    maxSizeArrayQuality = -1;
+                    QualityArray.Add(hostStatus);
+                }
+            }
+            for (int i = 0; i < QualityArray.Count; i++)
+            {
+                if (QualityArray[i] == true)
+                {
+                    LinkTrue++;
+                }
+            }
+            double QualityArrayDouble = QualityArray.Count;
+            LinkTrueTemp = LinkTrue / QualityArrayDouble * 100;
+            maxSizeArrayQuality++;
+            qualityLinkHost = (int)LinkTrueTemp;
+            return qualityLinkHost;
         }
     }
     class outputDataPinger // весь вывод текстовых сообщений перенести сюда, и переименовать класс. вывод сделать процедурно, и правильно назвать процедуры, чтобы было понятно
@@ -164,39 +243,74 @@ namespace Pinger
             Console.Write("Ping");
             writeCharLine(4);
             Console.Write("Quality");
-            writeCharLine(4);
+            writeCharLine(5);
             Console.Write("Description");
-            writeCharLine(36);
+            writeCharLine(43);
             Console.WriteLine();
         }
-        public void writeTextColor(String hostName, String ipAddress, long roadTrip, String description)
+        public void writeTextColor(String hostName, String ipAddress, long roadTrip, String description, int qualityHost)
         {
             int LengthHostName = hostName.Length;
+            int Lengthdescription = description.Length;
             int LengthipAddress = ipAddress.Length;
             String strRoadTrip = roadTrip.ToString();
             int LengthroadTrip = strRoadTrip.Length;
+            String stringQualityHost = qualityHost.ToString() + "%";
+            if (stringQualityHost.Length < 4)
+            {
+                if (stringQualityHost.Length < 3)
+                {
+                    stringQualityHost = "  " + stringQualityHost;
+                }
+                else
+                {
+                    stringQualityHost = " " + stringQualityHost;
+                }
+            }
+
             Console.BackgroundColor = ConsoleColor.Black;
             if (ipAddress == "not available")
             {
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.BackgroundColor = ConsoleColor.DarkRed;
+
+
+                //МНЕ СТЫДНО ЗА ЭТОТ КУСОК, Я ЕГО ПЕРЕПЕШУЮ ОБЕЩАЮ!<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+                string fileName = Environment.CurrentDirectory + "\\Data\\log.txt";
+                FileStream aFile = new FileStream(fileName, FileMode.OpenOrCreate);
+                StreamWriter sw = new StreamWriter(aFile);
+                aFile.Seek(0, SeekOrigin.End);
+                sw.WriteLine(DateTime.Now + " - " + hostName + " Недоступен");
+                sw.Close();
+
             }
             else if (ipAddress == "HOST NAME ERROR!")
             {
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.BackgroundColor = ConsoleColor.Red;
+
+
+
+                /*/МНЕ СТЫДНО ЗА ЭТОТ КУСОК, Я ЕГО ПЕРЕПЕШУЮ ОБЕЩАЮ!<<<<<ТУТ СКОРЕЕ ВСЕГО НЕ НАДО ЛОГИРОВАТЬ<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                string fileName = Environment.CurrentDirectory + "\\Data\\log.txt";
+                FileStream aFile = new FileStream(fileName, FileMode.OpenOrCreate);
+                StreamWriter sw = new StreamWriter(aFile);
+                aFile.Seek(0, SeekOrigin.End);
+                sw.WriteLine(DateTime.Now + " - " + hostName);
+                sw.Close();*/
             }
             else if (roadTrip == 0)
             {
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 roadTrip = 1;
             }
             else if (roadTrip < 3)
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-            else if (roadTrip < 21)
                 Console.ForegroundColor = ConsoleColor.Cyan;
+            else if (roadTrip < 21)
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
             else if (roadTrip < 41)
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.ForegroundColor = ConsoleColor.Green;
             else if (roadTrip < 71)
                 Console.ForegroundColor = ConsoleColor.Green;
             else if (roadTrip < 111)
@@ -216,11 +330,8 @@ namespace Pinger
                 writeCharLine(tempNumipAddress);
                 Console.Write(roadTrip);
                 writeCharLine(tempNumroadTrip + 2);
-                Console.Write(description);
-                //для расширения просто посмотрть как смотрится в будущем все будет работать
-                Console.Write("100%");
+                Console.Write(stringQualityHost);
                 writeCharLine(6);
-                Console.WriteLine();
             }
             else
             {
@@ -233,29 +344,30 @@ namespace Pinger
                 writeCharLine(tempNumipAddress);
                 Console.Write(roadTrip);
                 writeCharLine(tempNumroadTrip + 2);
-                Console.Write(description);
-                //для расширения просто посмотрть как смотрится  в будущем все будет работать       
-                Console.Write("100%");
+                Console.Write(stringQualityHost);
                 writeCharLine(6);
+
+            }
+            if (Lengthdescription > 55)
+            {
+                Console.Write(description.Substring(0, 53) + "..");
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.Write(description);
                 Console.WriteLine();
             }
             Console.ResetColor();
         }
     }
-    class InputHostNameTMP //после написания класса, удалить TMP <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    
+    class ConsolePinger
     {
         List<Host> ListHost = new List<Host>();
         string command = "";
         public void InputHostData()//переименуй процедуру
         {
             //вывод данных из файла на экран, пронумерованным списком
-            Console.WriteLine("Наберите команду для продолжения");
-            Console.WriteLine("D   - Вывести на экран содержимое файла \"HostDataBase.txt\"");
-            Console.WriteLine("R   - для чтения файла \"HostDataBase.txt\"");
-            Console.WriteLine("W   - для записи еще данных в конец файла, не стирая данные");
-            Console.WriteLine("RW  - для удаления данных из файла и записи их в ручную через консоль");
-            Console.WriteLine("      Испольюзуя ключ -b будет сделан backup в \\%root_program_folder%\\Data\\backup\\%date%.txt");
-
 
             for (bool check = true; check == true;)
             {
@@ -263,35 +375,91 @@ namespace Pinger
                 switch (command)
                 {
                     //добавить редактирование данных по строке
-                    case "D":
-                        displayFileData();
+                    case "disp":
+                        try
+                        {
+                            displayFileData();
+                        }
+                        catch (DirectoryNotFoundException)
+                        {
+                            Console.WriteLine("Файл отсутсвует");
+                        }
                         break;
-                    case "R":
+
+                    case "start":
                         readFile();
                         check = false;
                         break;
-                    case "W":
+
+                    case "add":
                         enterByHand();//ввод данных вручную
                         readFile();
                         check = false;
                         break;
-                    case "RW":
+
+                    case "add -r":
                         enterByHand();//ввод данных вручную
                         readFile();
                         check = false;
                         break;
-                    case "RW -b":
+
+                    case "add -b":
                         enterByHand();//ввод данных вручную
                         readFile();
                         check = false;
                         break;
+
+                    case "test":
+                        Ping pingSender = new Ping();
+                        PingOptions options = new PingOptions();
+
+                        // Use the default Ttl value which is 128,
+                        // but change the fragmentation behavior.
+                        options.DontFragment = true;
+
+                        // Create a buffer of 32 bytes of data to be transmitted.
+                        string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+                        byte[] buffer = Encoding.ASCII.GetBytes(data);
+                        int timeout = 120;
+                        PingReply reply = pingSender.Send("10.10.10.10", timeout, buffer, options);
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            Console.WriteLine("Address: {0}", reply.Address.ToString());
+                            Console.WriteLine("RoundTrip time: {0}", reply.RoundtripTime);
+                            Console.WriteLine("Time to live: {0}", reply.Options.Ttl);
+                            Console.WriteLine("Don't fragment: {0}", reply.Options.DontFragment);
+                            Console.WriteLine("Buffer size: {0}", reply.Buffer.Length);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Address: {0}", reply.Address.ToString());
+                            Console.WriteLine("RoundTrip time: {0}", reply.RoundtripTime);
+                            //Console.WriteLine("Time to live: {0}", reply.Options.Ttl);
+                            // Console.WriteLine("Don't fragment: {0}", reply.Options.DontFragment);
+                            Console.WriteLine("Buffer size: {0}", reply.Buffer.Length);
+                        }
+                        reply = pingSender.Send("8.8.8.8", timeout, buffer, options);
+                        if (reply.Status == IPStatus.Success)
+                        {
+                            Console.WriteLine("Address: {0}", reply.Address.ToString());
+                            Console.WriteLine("RoundTrip time: {0}", reply.RoundtripTime);
+                            Console.WriteLine("Time to live: {0}", reply.Options.Ttl);
+                            Console.WriteLine("Don't fragment: {0}", reply.Options.DontFragment);
+                            Console.WriteLine("Buffer size: {0}", reply.Buffer.Length);
+                        }
+                        break;
+
+                    case "help":
+                        Console.WriteLine("Наберите команду для продолжения");
+                        Console.WriteLine("disp    - Вывести на экран содержимое файла \"HostDataBase.txt\"");
+                        Console.WriteLine("start   - Запуск Пингера, по данным файла\"HostDataBase.txt\"");
+                        Console.WriteLine("add     - для записи еще данных в конец файла, не стирая данные");
+                        Console.WriteLine("add -r  - для удаления данных из файла и записи их в ручную через консоль");
+                        Console.WriteLine("add -b  - будет сделан backup в \\%root_program_folder%\\Data\\backup\\%date%.txt");
+                        break;
+
                     default:
                         Console.WriteLine("Команда введена не верно, повторите ввод \n");
-                        Console.WriteLine("Наберите команду для продолжения");
-                        Console.WriteLine("R   - для чтения файла \"HostDataBase.txt\"");
-                        Console.WriteLine("W   - для записи еще данных в конец файла, не стирая данные");
-                        Console.WriteLine("RW  - для удаления данных из файла и записи их в ручную через консоль");
-                        Console.WriteLine("      Испольюзуя ключ -b будет сделан backup в \\%root_program_folder%\\Data\\backup\\%date%.txt");
                         break;
                 }
             }
@@ -350,12 +518,18 @@ namespace Pinger
                 char[] poolLineCharFromFile = tempLineFromFile.ToCharArray();
                 for (int j = 0; j < poolLineCharFromFile.Length; j++)
                 {
+                    separator = j;
                     if (poolLineCharFromFile[j] == ' ')
                     {
-                        separator = j;
                         break;
                     }
                 }
+
+                //Если не стоит пробел после адреса хоста, своеобразная обработка исключений.
+                if (separator == poolLineCharFromFile.Length - 1)
+                    separator = poolLineCharFromFile.Length;
+
+
                 tempHostName = ""; //Обнуление переменных
                 tempDescription = "";
                 for (int k = 0; k < separator; k++)
@@ -369,9 +543,9 @@ namespace Pinger
                     tempDescription = tempDescription + tempChar;
                 }
                 if (tempHostName == "")
-                    tempHostName = "null";//да это костыль, отстаньте!
+                    tempHostName = "\'null\'";
                 if (tempDescription == "")
-                    tempDescription = "null";//да это костыль, отстаньте!
+                    tempDescription = "\'null\'";
                 createAndFillObjectHost(tempHostName, tempDescription);
             }
         }
@@ -399,3 +573,32 @@ namespace Pinger
         }
     }
 }
+/*class Logfile
+{
+    public void writeErr(string catErr )
+    {
+        //продумать условия, при включенном пингере 23.00 - 1.00, чтобы проверял время и если число изменилось, создавал новый файл и писал уже в него
+        //c фиксацией времени и даты с созданием каталогов \месяц_год\число.тхт > в самом документе %время% %имя хоста% %текст ошибки%
+        if (catErr == "Warning")
+        // запись в файл информации о предупреждении высокого пинга 
+        else if (catErr == "not available")
+        // запись в файл информации о недоступности хоста c фиксацией времени и даты
+        else return;
+    }     
+}*/
+/* 
+ *
+ *  займись наконец ООП и раскидай классы по файлам!
+ *
+ *  переработай имена в более корректные и убодные не будь ленивой задницей, думай как их сделать более удобными постоянно!!!
+ *
+ *  добавь ведение лога с привязкой времени 
+ *
+ *  сделать потоки, один для вывода на экран сообщений, второй для выхода из цикла(нажатием кнопки, вводом сообщения...??????)
+ *
+ *  создание отдельного класса inputHostName, тянуть из файла(xml\txt), плюс отдельная процедура для редакирования данных. 50% сделано, доделай до конца
+ *  
+ *  Обработка полностью пустой строки в процедуре ReadFile()
+ *  
+ *  последним добавить отправку сообщений на эл.почту (продумать как правильно сделать, чтобы не спамить)
+ */
