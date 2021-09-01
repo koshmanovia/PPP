@@ -5,3 +5,5 @@ C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.csproj.Ass
 C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.csproj.CoreCompileInputs.cache
 C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.exe
 C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.pdb
+C:\MyProg\VS\projects\PPP\PingerPetProject\bin\Debug\Host.mdf
+C:\MyProg\VS\projects\PPP\PingerPetProject\bin\Debug\Host_log.ldf
