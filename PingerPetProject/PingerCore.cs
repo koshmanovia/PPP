@@ -25,9 +25,9 @@ namespace PingerPetProject
     {
         [Column(IsPrimaryKey = true, IsDbGenerated = true)]
         public int iteration_num { get; set; }
-        [Column]
-        public int hostID { get; set; }
         [Column(Name = "hostID")]
+        public int hostID { get; set; }
+        [Column]
         public bool hostStatus { get; set; }
     }
     #endregion
@@ -45,7 +45,8 @@ namespace PingerPetProject
             Console.WriteLine();
             foreach (var checkinghost in CheckingHosts)
             //checkinghost.hostStatus - возвращает все запросы true хотя в бд не так, почему?
-            { Console.WriteLine("{0} \t{1} \t{2}", checkinghost.iteration_num, checkinghost.hostID, checkinghost.hostStatus); }
+            //
+            {Console.WriteLine("{0} \t{1} \t{2}", checkinghost.iteration_num, checkinghost.hostID,  checkinghost.hostStatus); }
         }
     }
 }
