@@ -59,7 +59,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HostDataSet2.Designer.cs">
+    <Compile Include="AppData\HostDataSet2.cs">
+      <DependentUpon>HostDataSet2.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="AppData\HostDataSet2.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>HostDataSet2.xsd</DependentUpon>
@@ -75,16 +78,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="HostDataSet2.xsc">
+    <None Include="AppData\App.config" />
+    <None Include="AppData\HostDataSet2.xsc">
       <DependentUpon>HostDataSet2.xsd</DependentUpon>
     </None>
-    <None Include="HostDataSet2.xsd">
+    <None Include="AppData\HostDataSet2.xsd">
       <Generator>MSDataSetGenerator</Generator>
       <LastGenOutput>HostDataSet2.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
-    <None Include="HostDataSet2.xss">
+    <None Include="AppData\HostDataSet2.xss">
       <DependentUpon>HostDataSet2.xsd</DependentUpon>
     </None>
     <None Include="Properties\Settings.settings">
@@ -93,10 +96,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Host.mdf">
+    <Content Include="AppData\Host.mdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Host_log.ldf">
+    <Content Include="AppData\Host_log.ldf">
       <DependentUpon>Host.mdf</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
