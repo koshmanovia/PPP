@@ -14,10 +14,10 @@ namespace PingerPetProject
     [Table(Name = "Hosts")]
     internal class Hosts
     {
-        [Column(IsPrimaryKey = true, IsDbGenerated = true)]
+        [Column(IsPrimaryKey = true, IsDbGenerated = true, Name = "hostID")]
         public int hostID { get; set; }
         
-        [Column(Name = "hostID")]
+        [Column]
         public string hostName { get; set; }
         
         [Column]
@@ -51,25 +51,16 @@ namespace PingerPetProject
             {Console.WriteLine("{0} \t{1} \t{2}", checkinghost.iteration_num, checkinghost.hostID,  checkinghost.hostStatus); }
         }
         public void testInputHosts(int hostID, string hostName, string physLocationHost)
-        {
-            string sqlExpression = $"INSERT INTO Hosts (hostID, hostName,physLocationHost) VALUES ({hostID}, '{hostName}','{physLocationHost}'))";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                //int number = command.ExecuteNonQuery();
-               // Console.WriteLine("Добавлено объектов: {0}", number);
-            }
+        {      
+            Hosts host = new Hosts { hostID = hostID, hostName = hostName, physLocationHost = physLocationHost };            
+            db.GetTable<Hosts>().InsertOnSubmit(host);            
+            db.SubmitChanges();            
         }
         public void testInputCheckingHosts(int iteration_num, int hostID, bool hostStatus)
         {
-            string sqlExpression = $"INSERT INTO Hosts (hostID, hostName,physLocationHost) VALUES ({iteration_num}, {hostID},{hostStatus}))";
-                db.();
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                //int number = command.ExecuteNonQuery();
-                // Console.WriteLine("Добавлено объектов: {0}", number);
-
+            CheckingHosts checkinghosts = new CheckingHosts { iteration_num= iteration_num, hostID = hostID, hostStatus = hostStatus };            
+            db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
+            db.SubmitChanges();
         }
          
     }
