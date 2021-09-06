@@ -15,8 +15,11 @@ namespace PingerPetProject
         static void Main()
         {
             PingerCore pc = new PingerCore();
-            pc.testInputHosts(1, "four", "any_loc");
-            pc.testInputCheckingHosts(1, 4, true);
+            pc.InsertDataInHosts("four", "any_loc");
+           
+            //for(int i = 0; i < 11; i++)
+                pc.InsertDataInCheckingHosts(0, true);
+
             pc.test();
             Console.ReadLine();            
         }

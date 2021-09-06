@@ -38,10 +38,22 @@ namespace PingerPetProject
     #endregion
     class PingerCore
     {
-        static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\AppData\Host.mdf;Integrated Security=True";
-        static DataContext db = new DataContext(connectionString);
-        Table<Hosts> Hosts = db.GetTable<Hosts>();
-        Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
+        private static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\AppData\Host.mdf;Integrated Security=True";
+        private static DataContext db = new DataContext(connectionString);
+        private Table<Hosts> Hosts = db.GetTable<Hosts>();
+        private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
+        public void InsertDataInHosts( string hostName, string physLocationHost)
+        {      
+            Hosts host = new Hosts {  hostName = hostName, physLocationHost = physLocationHost };            
+            db.GetTable<Hosts>().InsertOnSubmit(host);            
+            db.SubmitChanges();            
+        }
+        public void InsertDataInCheckingHosts(int hostID, bool hostStatus)
+        {
+            CheckingHosts checkinghosts = new CheckingHosts {  hostID = hostID, hostStatus = hostStatus };            
+            db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
+            db.SubmitChanges();
+        }
         public void test()
         {            
             foreach (var host in Hosts)
@@ -50,18 +62,5 @@ namespace PingerPetProject
             foreach (var checkinghost in CheckingHosts)
             {Console.WriteLine("{0} \t{1} \t{2}", checkinghost.iteration_num, checkinghost.hostID,  checkinghost.hostStatus); }
         }
-        public void testInputHosts(int hostID, string hostName, string physLocationHost)
-        {      
-            Hosts host = new Hosts { hostID = hostID, hostName = hostName, physLocationHost = physLocationHost };            
-            db.GetTable<Hosts>().InsertOnSubmit(host);            
-            db.SubmitChanges();            
-        }
-        public void testInputCheckingHosts(int iteration_num, int hostID, bool hostStatus)
-        {
-            CheckingHosts checkinghosts = new CheckingHosts { iteration_num= iteration_num, hostID = hostID, hostStatus = hostStatus };            
-            db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
-            db.SubmitChanges();
-        }
-         
     }
 }
