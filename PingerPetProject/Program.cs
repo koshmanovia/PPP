@@ -14,7 +14,10 @@ namespace PingerPetProject
     {
         static void Main()
         {
-            PingerCore.test();
+            PingerCore pc = new PingerCore();
+            pc.testInputHosts(10, "test name", "test loc");
+            pc.testInputCheckingHosts(12, 1, true);
+            pc.test();
             Console.ReadLine();            
         }
     }
