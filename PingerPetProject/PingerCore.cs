@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Linq;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.Linq.Mapping;
-using System.Data.SqlClient;
-using System.Data;
+using System.Net.NetworkInformation;
 
 namespace PingerPetProject
 {
@@ -38,23 +34,41 @@ namespace PingerPetProject
     #endregion
     class PingerCore
     {
+        private Ping Pinger = new Ping();
+        private PingOptions options = new PingOptions(128, dontFragment:true);//перенести в конструкторы управление ttl
+
         private static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\AppData\Host.mdf;Integrated Security=True";
         private static DataContext db = new DataContext(connectionString);
         private Table<Hosts> Hosts = db.GetTable<Hosts>();
         private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
-        public void InsertDataInHosts( string hostName, string physLocationHost)
-        {      
-            Hosts host = new Hosts {  hostName = hostName, physLocationHost = physLocationHost };            
-            db.GetTable<Hosts>().InsertOnSubmit(host);            
-            db.SubmitChanges();            
+
+        private bool needInsertHosts = true;
+
+        public List<(string hostName, string ipAddress, ushort Ping, string Description)> StastPing (List<(string HostName,string physLocationHost)> hostsLoop)//Придумать нормальные имена массиву передаваему и методу
+        {
+            if (needInsertHosts != false)
+            {
+                InsertDataInHosts(hostsLoop);
+            }
         }
-        public void InsertDataInCheckingHosts(int hostID, bool hostStatus)
+
+        private void InsertDataInHosts(List<(string hostName,string physLocationHost)> hostsLoop)
+        {
+            for (int i = 0; i < hostsLoop.Count; i++)
+            {
+                Hosts host = new Hosts { hostName = hostsLoop[i].hostName, physLocationHost = hostsLoop[i].physLocationHost };
+                db.GetTable<Hosts>().InsertOnSubmit(host);
+            }
+            db.SubmitChanges();
+        }
+
+         private void InsertDataInCheckingHosts(int hostID, bool hostStatus)
         {
             CheckingHosts checkinghosts = new CheckingHosts {  hostID = hostID, hostStatus = hostStatus };            
             db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
             db.SubmitChanges();
         }
-        public void test()
+         public void test()
         {            
             foreach (var host in Hosts)
             {Console.WriteLine("{0} \t{1} \t{2}", host.hostID, host.hostName, host.physLocationHost); }
