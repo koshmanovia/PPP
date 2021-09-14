@@ -49,28 +49,60 @@ namespace PingerPetProject
 
         private Thread connectionsLiveMonitor = default;
 
-        //public List<(string hostName, string ipAddress, ushort Ping, string Description)> StastPing (List<(string HostName,string physLocationHost)> hostsLoop)//Придумать нормальные имена массиву передаваему и методу
-        //{
-        //    if (needInsertHosts != false)
-        //    {
-        //        InsertDataInHosts(hostsLoop);
-        //        needInsertHosts = false;
-        //    }
-        //}
-        private void Ping(List<(string HostName, string physLocationHost)> hostsLoop)
+        public List<(string hostName, string ipAddress, ushort Ping, string Description)> massPing (List<(string HostName,string physLocationHost)> hostsLoop)//Придумать нормальные имена массиву передаваему и методу
         {
-            connectionsLiveMonitor = new Thread(new ThreadStart(CheckingNetConnetions));//проверка во время выполнения пинга, есть ли сетевое соединение
-            connectionsLiveMonitor.Start();
-            for (int i = 0; i < hostsLoop.Count; i++)
+            var returnList = new List<(string hostName, string ipAddress, ushort Ping, string Description)>();
+            if (needInsertHosts != false)
             {
-                try
-                {
-                    PingReply replyInputDataHost = Pinger.Send(hostsLoop[i].HostName, timeOutHostPing);
-                }
-                
+                InsertDataInHosts(hostsLoop);
+                needInsertHosts = false;
             }
 
+            for (int i = 0; i < hostsLoop.Count; i++)
+            {
+                (string, bool) tepmPingData;
+                connectionsLiveMonitor = new Thread(new ThreadStart(CheckingNetConnetions)); //проверка во время выполнения пинга, есть ли сетевое соединение
+                connectionsLiveMonitor.Start();
+                tepmPingData = Ping(hostsLoop[i].HostName);//придумать как пропинговать все адреса и правильно заполнить бд и возвращаемый List
+                InsertDataInCheckingHosts(i,tepmPingData.Item2);
+            }
+            return returnList;
+        }
+        private (string ,bool) Ping(string HostName)
+        {
+            string ipAddress = default;
+            bool positivePing = default;
+            (string, bool) ret = (default, default);
+            try
+            {
+                PingReply replyInputDataHost = Pinger.Send(HostName, timeOutHostPing);
+                if (replyInputDataHost.Status != IPStatus.Success)
+                {
+                    ipAddress = "not available";
+                }
+                else
+                {
+                    try
+                    {
+                        ipAddress = replyInputDataHost.Address.ToString();
+                        positivePing = true;
+                    }
+                    catch (NullReferenceException)
+                    {
+                        ipAddress = "not available";
+                    }
+                }
+            }
+            catch (PingException)
+            {
+                ipAddress = "HOST NAME ERROR!";
 
+            }
+            catch (ArgumentException)
+            {
+                ipAddress = "HOST NAME ERROR!";
+            }
+            return (ipAddress, positivePing);
         }
         private void InsertDataInHosts(List<(string hostName,string physLocationHost)> hostsLoop)
         {
@@ -81,14 +113,13 @@ namespace PingerPetProject
             }
             db.SubmitChanges();
         }
-
-         private void InsertDataInCheckingHosts(int hostID, bool hostStatus)
+        private void InsertDataInCheckingHosts(int hostID, bool hostStatus)
          {
             CheckingHosts checkinghosts = new CheckingHosts {  hostID = hostID, hostStatus = hostStatus };            
             db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
             db.SubmitChanges();
          }
-         public void test()
+         public void ConsoleCheckDataInDataBase()
          {            
             foreach (var host in Hosts)
             {Console.WriteLine("{0} \t{1} \t{2}", host.hostID, host.hostName, host.physLocationHost); }
@@ -98,11 +129,7 @@ namespace PingerPetProject
          }
         private void CheckingNetConnetions()
          {
-             if (NetworkInterface.GetIsNetworkAvailable())
-             {
-                Thread.Sleep(1500);
-             }
-             else
+             if (!NetworkInterface.GetIsNetworkAvailable())
              {
                  throw new Exception("Нет сети проверить соединение!");
              }
