@@ -49,7 +49,8 @@ namespace PingerPetProject
 
         private Thread connectionsLiveMonitor = default;
 
-        public List<(string hostName, string ipAddress, ushort Ping, string Description)> massPing (List<(string HostName,string physLocationHost)> hostsLoop)//Придумать нормальные имена массиву передаваему и методу
+        //сделать нормальный конструктор
+        public List<(string hostName, string ipAddress, ushort Ping, string Description)> massPing (List<(string HostName,string physLocationHost)> hostsLoop)//Переписать метод чтобы целял данные из конструктора
         {
             var returnList = new List<(string hostName, string ipAddress, ushort Ping, string Description)>();
             if (needInsertHosts != false)
