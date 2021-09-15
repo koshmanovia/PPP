@@ -11,5 +11,8 @@ using System.IO;
 
 namespace PingerPetProject
 {
-
+    class PingerConsole()
+    {
+        private PingerCore pc = new PingerCore();
+    }
 }

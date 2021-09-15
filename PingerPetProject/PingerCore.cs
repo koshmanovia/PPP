@@ -45,6 +45,7 @@ namespace PingerPetProject
         private Table<Hosts> Hosts = db.GetTable<Hosts>();
         private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
 
+
         private bool needInsertHosts = true;
 
         private Thread connectionsLiveMonitor = default;
@@ -52,6 +53,8 @@ namespace PingerPetProject
         //сделать нормальный конструктор
         public List<(string hostName, string ipAddress, ushort Ping, string Description)> massPing (List<(string HostName,string physLocationHost)> hostsLoop)//Переписать метод чтобы целял данные из конструктора
         {
+            List<(string, bool)> tepmPingData = new List<(string, bool)>(hostsLoop.Count);
+
             var returnList = new List<(string hostName, string ipAddress, ushort Ping, string Description)>();
             if (needInsertHosts != false)
             {
@@ -61,11 +64,10 @@ namespace PingerPetProject
 
             for (int i = 0; i < hostsLoop.Count; i++)
             {
-                (string, bool) tepmPingData;
                 connectionsLiveMonitor = new Thread(new ThreadStart(CheckingNetConnetions)); //проверка во время выполнения пинга, есть ли сетевое соединение
                 connectionsLiveMonitor.Start();
-                tepmPingData = Ping(hostsLoop[i].HostName);//придумать как пропинговать все адреса и правильно заполнить бд и возвращаемый List
-                InsertDataInCheckingHosts(i,tepmPingData.Item2);
+                tepmPingData[i] = Ping(hostsLoop[i].HostName);
+                InsertDataInCheckingHosts(i, tepmPingData[i].Item2);
             }
             return returnList;
         }
@@ -73,7 +75,6 @@ namespace PingerPetProject
         {
             string ipAddress = default;
             bool positivePing = default;
-            (string, bool) ret = (default, default);
             try
             {
                 PingReply replyInputDataHost = Pinger.Send(HostName, timeOutHostPing);
@@ -132,7 +133,7 @@ namespace PingerPetProject
          {
              if (!NetworkInterface.GetIsNetworkAvailable())
              {
-                 throw new Exception("Нет сети проверить соединение!");
+                 throw new Exception("Нет сети -- проверить соединение!");
              }
          }
     }

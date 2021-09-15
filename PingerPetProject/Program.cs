@@ -14,7 +14,8 @@ namespace PingerPetProject
     {
         static void Main()
         {
-         
+            PingerCore jk = 
+
         }
     }
 }
