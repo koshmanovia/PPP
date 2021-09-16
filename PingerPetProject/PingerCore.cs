@@ -51,11 +51,10 @@ namespace PingerPetProject
         private Thread connectionsLiveMonitor = default;
 
         //сделать нормальный конструктор
-        public List<(string hostName, string ipAddress, ushort Ping, string Description)> massPing (List<(string HostName,string physLocationHost)> hostsLoop)//Переписать метод чтобы целял данные из конструктора
+        public List<(string _hostName, string _ipAddress, long _Ping, string _Description)> massPing (List<(string HostName,string physLocationHost)> hostsLoop)//Переписать метод чтобы целял данные из конструктора
         {
-            List<(string, bool)> tepmPingData = new List<(string, bool)>(hostsLoop.Count);
-
-            var returnList = new List<(string hostName, string ipAddress, ushort Ping, string Description)>();
+            List<(string ipAddress, bool hostAlive, long Ping)> tepmPingData = new List<(string, bool, long)>(hostsLoop.Count);
+            var returnList = new List<(string hostName, string ipAddress, long Ping, string Description)>(hostsLoop.Count);
             if (needInsertHosts != false)
             {
                 InsertDataInHosts(hostsLoop);
@@ -67,14 +66,22 @@ namespace PingerPetProject
                 connectionsLiveMonitor = new Thread(new ThreadStart(CheckingNetConnetions)); //проверка во время выполнения пинга, есть ли сетевое соединение
                 connectionsLiveMonitor.Start();
                 tepmPingData[i] = Ping(hostsLoop[i].HostName);
-                InsertDataInCheckingHosts(i, tepmPingData[i].Item2);
+                InsertDataInCheckingHosts(i, tepmPingData[i].hostAlive);
+                // returnList[i](hostsLoop[i].HostName, tepmPingData[i].ipAddress, tepmPingData[i].Ping, hostsLoop[i].physLocationHost);
+                returnList[i].hostName = hostsLoop[i].HostName;
+                returnList[i].ipAddress = tepmPingData[i].ipAddress;
+                returnList[i].Ping = tepmPingData[i].Ping;
+                returnList[i].Description = hostsLoop[i].physLocationHost;
+
+
             }
             return returnList;
         }
-        private (string ,bool) Ping(string HostName)
+        private (string ,bool, long) Ping(string HostName)
         {
             string ipAddress = default;
             bool positivePing = default;
+            long tempRoadTrip = default;
             try
             {
                 PingReply replyInputDataHost = Pinger.Send(HostName, timeOutHostPing);
@@ -88,6 +95,14 @@ namespace PingerPetProject
                     {
                         ipAddress = replyInputDataHost.Address.ToString();
                         positivePing = true;
+                        if (replyInputDataHost.RoundtripTime == 0)
+                        {
+                            tempRoadTrip = replyInputDataHost.RoundtripTime + 1;
+                        }
+                        else
+                        {
+                            tempRoadTrip = replyInputDataHost.RoundtripTime;
+                        }
                     }
                     catch (NullReferenceException)
                     {
@@ -104,7 +119,7 @@ namespace PingerPetProject
             {
                 ipAddress = "HOST NAME ERROR!";
             }
-            return (ipAddress, positivePing);
+            return (ipAddress, positivePing, tempRoadTrip);
         }
         private void InsertDataInHosts(List<(string hostName,string physLocationHost)> hostsLoop)
         {
