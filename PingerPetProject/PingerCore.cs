@@ -45,18 +45,16 @@ namespace PingerPetProject
         private Table<Hosts> Hosts = db.GetTable<Hosts>();
         private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
 
-
         private bool needInsertHosts = true;
 
         private Thread connectionsLiveMonitor = default;
 
+        private Thread threadForPing = default;
         //сделать нормальный конструктор
-        public List<(string _hostName, string _ipAddress, long _Ping, string _Description)> massPing (List<(string HostName,string physLocationHost)> hostsLoop)//Переписать метод чтобы целял данные из конструктора
+        public List<(string _hostName, string _ipAddress, long _Ping, string _Description)> massPing(List<(string HostName,string physLocationHost)> hostsLoop)//Переписать метод чтобы целял данные из конструктора
         {
-
             List<(string hostName, string ipAddress, long Ping, string Description)>returnList =
                 new List<(string , string, long, string)>(hostsLoop.Count);
-            (string hostName, string ipAddress, long Ping, string Description) tempValueReturnList = default;
             if (needInsertHosts != false)
             {
                 InsertDataInHosts(hostsLoop);
@@ -66,20 +64,25 @@ namespace PingerPetProject
             {
                 connectionsLiveMonitor = new Thread(new ThreadStart(CheckingNetConnetions)); //проверка во время выполнения пинга, есть ли сетевое соединение
                 connectionsLiveMonitor.Start();
-                c
-                InsertDataInCheckingHosts(i, tepmPingData[i].hostAlive);
-                tempValueReturnList.hostName = hostsLoop[i].HostName;
-                tempValueReturnList.ipAddress = tepmPingData[i].ipAddress;
-                tempValueReturnList.Ping = tepmPingData[i].Ping;
-                tempValueReturnList.Description = hostsLoop[i].physLocationHost;
-                returnList[i] = tempValueReturnList;
+                threadForPing = new Thread(threadPing);
+                threadForPing.Start(ref returnList, ref hostsLoop, ref i, hostsLoop[i].physLocationHost);
             }
             return returnList;
         }
-        private void threadPing(ref List<object> list, int iterationNum, string hostName)
+        private void threadPing(ref List<(string hostName, string ipAddress, long Ping, string Description)> returnList,
+            ref List<(string HostName, string physLocationHost)> hostsLoop,ref int iterationNum,string hostName)
         {
             (string ipAddress, bool hostAlive, long Ping) tepmPingData;
+            (string hostName, string ipAddress, long Ping, string Description) tempValueReturnList = default;
 
+            tepmPingData = Ping(hostName);
+
+            InsertDataInCheckingHosts(iterationNum, tepmPingData.hostAlive);
+            tempValueReturnList.hostName = hostsLoop[iterationNum].HostName;
+            tempValueReturnList.ipAddress = tepmPingData.ipAddress;
+            tempValueReturnList.Ping = tepmPingData.Ping;
+            tempValueReturnList.Description = hostsLoop[iterationNum].physLocationHost;
+            returnList[iterationNum] = tempValueReturnList;
         }
         private (string ,bool, long) Ping(string HostName)
         {
