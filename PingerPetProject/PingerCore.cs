@@ -36,14 +36,15 @@ namespace PingerPetProject
     #endregion
     class PingerCore
     {
-         private class ManagePingerDataBase
-        {
+         
+         protected class ManagePingerDataBase
+         {
             private static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\AppData\Host.mdf;Integrated Security=True";
             private static DataContext db = new DataContext(connectionString);
             private Table<Hosts> Hosts = db.GetTable<Hosts>();
             private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
 
-            private static void InsertDataInHosts(List<(string hostName, string physLocationHost)> hostsLoop)
+           protected static void InsertDataInHosts(List<(string hostName, string physLocationHost)> hostsLoop)
             {
                 for (int i = 0; i < hostsLoop.Count; i++)
                 {
@@ -133,6 +134,7 @@ namespace PingerPetProject
                 return (ipAddress, positivePing, tempRoadTrip);
             }
         }
+
     }
     
 }
