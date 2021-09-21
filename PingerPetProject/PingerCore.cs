@@ -36,64 +36,70 @@ namespace PingerPetProject
     #endregion
     class PingerCore
     {
-         
-         protected class ManagePingerDataBase
-         {
-            private static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\AppData\Host.mdf;Integrated Security=True";
-            private static DataContext db = new DataContext(connectionString);
-            private Table<Hosts> Hosts = db.GetTable<Hosts>();
-            private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
+        private static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\AppData\Host.mdf;Integrated Security=True";
+        private static DataContext db = new DataContext(connectionString);
+        private Table<Hosts> Hosts = db.GetTable<Hosts>();
+        private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
 
-           protected static void InsertDataInHosts(List<(string hostName, string physLocationHost)> hostsLoop)
+        private static class ManagePingerDataBase
+        {
+            public static void InsertDataInHosts(string _hostName, string _physLocationHost)
             {
-                for (int i = 0; i < hostsLoop.Count; i++)
-                {
-                    Hosts host = new Hosts { hostName = hostsLoop[i].hostName, physLocationHost = hostsLoop[i].physLocationHost };
-                    db.GetTable<Hosts>().InsertOnSubmit(host);
-                }
+                Hosts host = new Hosts { hostName = _hostName, physLocationHost = _physLocationHost };
+                db.GetTable<Hosts>().InsertOnSubmit(host);
                 db.SubmitChanges();
-            }
-            private static void InsertDataInCheckingHosts(int hostID, bool hostStatus)
+            } 
+            public static void InsertDataInCheckingHosts(int hostID, bool hostStatus)
             {
                 CheckingHosts checkinghosts = new CheckingHosts { hostID = hostID, hostStatus = hostStatus };
                 db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
                 db.SubmitChanges();
             }
-            public static void ConsoleCheckDataInDataBase()
+            public static void GetHostNameFromHosts(int id)
             {
-                foreach (var host in Hosts)
-                { Console.WriteLine("{0} \t{1} \t{2}", host.hostID, host.hostName, host.physLocationHost); }
-                Console.WriteLine();
-                foreach (var checkinghost in CheckingHosts)
-                { Console.WriteLine("{0} \t{1} \t{2}", checkinghost.iteration_num, checkinghost.hostID, checkinghost.hostStatus); }
+                //наполнить
             }
-            private void CheckingNetConnetions()
+            public static void GetPhysLocationHostFromHosts(int id)
             {
-                if (!NetworkInterface.GetIsNetworkAvailable())
-                {
-                    throw new Exception("Нет сети -- проверить соединение!");
-                }
+               //наполнить
+            }
+            public static void GetAllPingFromCheckingHosts(int id)
+            {
+                //наполнить
+            }
+            public static void GetPositivePingFromCheckingHosts(int id)
+            {
+                //наполнить
             }
         }
  
         class Host
         {
-            
+            private string physLocationHost = default;
+            private string hostName = default;
+            private string ipAddress = default;
+            private bool positivePing = default;
+            private long roadTrip = default;
+            private int quallity = default;
+            private int idInDataBase = default;
+            public string HostName
+            {
+                get;//получение имени из базы данных
+                set;//ввод имени в базу данных
+            }
+            public string PhysLocationHost
+            {
+                get;//получение расположения из базы данных
+                set;//ввод расположения в базу данных
+            }
             private Ping Pinger = new Ping();
             private PingOptions options = new PingOptions(128, dontFragment: true);//перенести в конструкторы управление ttl
             private int timeOutHostPing = 3000;//перенести в конструкторы управление временем пинга
-
-            private bool needInsertHosts = true;
-
-            private Thread connectionsLiveMonitor = default;
-
+            
             private Thread threadForPing = default;
             //сделать нормальный конструктор
-            private (string, bool, long) Ping(string HostName)
+            public void Ping()
             {
-                string ipAddress = default;
-                bool positivePing = default;
-                long tempRoadTrip = default;
                 try
                 {
                     PingReply replyInputDataHost = Pinger.Send(HostName, timeOutHostPing);
@@ -109,11 +115,11 @@ namespace PingerPetProject
                             positivePing = true;
                             if (replyInputDataHost.RoundtripTime == 0)
                             {
-                                tempRoadTrip = replyInputDataHost.RoundtripTime + 1;
+                                roadTrip = replyInputDataHost.RoundtripTime + 1;
                             }
                             else
                             {
-                                tempRoadTrip = replyInputDataHost.RoundtripTime;
+                                roadTrip = replyInputDataHost.RoundtripTime;
                             }
                         }
                         catch (NullReferenceException)
@@ -131,10 +137,27 @@ namespace PingerPetProject
                 {
                     ipAddress = "HOST NAME ERROR!";
                 }
-                return (ipAddress, positivePing, tempRoadTrip);
+                finally
+                {
+                    //(ipAddress, positivePing, tempRoadTrip);
+                } 
             }
         }
-
+        private void CheckingNetConnetions()
+        {
+            if (!NetworkInterface.GetIsNetworkAvailable())
+            {
+                throw new Exception("Нет сети -- проверить соединение!");
+            }
+        }
+        public void ConsoleCheckDataInDataBase()
+        {
+            foreach (var host in Hosts)
+            { Console.WriteLine("{0} \t{1} \t{2}", host.hostID, host.hostName, host.physLocationHost); }
+            Console.WriteLine();
+            foreach (var checkinghost in CheckingHosts)
+            { Console.WriteLine("{0} \t{1} \t{2}", checkinghost.iteration_num, checkinghost.hostID, checkinghost.hostStatus); }
+        }
     }
     
 }
