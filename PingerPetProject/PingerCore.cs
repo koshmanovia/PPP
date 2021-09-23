@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Data.Linq.Mapping;
+using System.Data.SqlClient;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -84,8 +85,16 @@ namespace PingerPetProject
             private int idInDataBase = default;
             public string HostName
             {
-                get;//получение имени из базы данных
-                set;//ввод имени в базу данных
+                get
+                {
+                    string sqlExpression = $"SELECT hostName FROM Hosts WHERE hostID = \'{idInDataBase}\'";
+                    return hostName;
+                } //получение имени из базы данных
+                set
+                {
+                    hostName = HostName;
+                } //ввод имени в базу данных
+
             }
             public string PhysLocationHost
             {
@@ -143,6 +152,26 @@ namespace PingerPetProject
                 } 
             }
         }
+
+        public static void TestGetDataFromHosts(int idInDataBase)
+        {
+            PingerCore pc = new PingerCore();
+            ManagePingerDataBase.InsertDataInHosts("test", "test");
+            pc.ConsoleCheckDataInDataBase();
+            string sqlExpression = $"SELECT hostName FROM Hosts WHERE hostID = \'{idInDataBase}\'";
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand(sqlExpression, connection);
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.HasRows) 
+                {
+                    Console.WriteLine("hostName with id {0} from table Hosts = {1}", idInDataBase, reader.GetValue(0));
+                }
+
+            }
+    }
+
         private void CheckingNetConnetions()
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
