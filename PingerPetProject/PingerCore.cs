@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Linq;
 using System.Data.Linq.Mapping;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -153,24 +154,17 @@ namespace PingerPetProject
             }
         }
 
-        public static void TestGetDataFromHosts(int idInDataBase)
+        public void TestGetDataFromHosts(int idInDataBase)
         {
-            PingerCore pc = new PingerCore();
-            ManagePingerDataBase.InsertDataInHosts("test", "test");
-            pc.ConsoleCheckDataInDataBase();
-            string sqlExpression = $"SELECT hostName FROM Hosts WHERE hostID = \'{idInDataBase}\'";
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                SqlCommand command = new SqlCommand(sqlExpression, connection);
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.HasRows) 
-                {
-                    Console.WriteLine("hostName with id {0} from table Hosts = {1}", idInDataBase, reader.GetValue(0));
-                }
-
-            }
-    }
+            ManagePingerDataBase.InsertDataInHosts("t1", "t2");
+            ManagePingerDataBase.InsertDataInHosts("t1", "t2");
+            ManagePingerDataBase.InsertDataInHosts("t1", "t2");
+            ManagePingerDataBase.InsertDataInHosts("t1", "t2");
+            Console.WriteLine(Hosts.ToString());
+            Console.WriteLine();
+            ConsoleCheckDataInDataBase();
+            var subset = from s in Hosts where 
+        }
 
         private void CheckingNetConnetions()
         {

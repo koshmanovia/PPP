@@ -14,8 +14,8 @@ namespace PingerPetProject
     {
         static void Main()
         {
-            PingerCore.TestGetDataFromHosts(0);
-
+            var pc = new PingerCore();
+            pc.TestGetDataFromHosts(0);
             Console.Read();
         }
     }
