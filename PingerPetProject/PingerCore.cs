@@ -57,9 +57,9 @@ namespace PingerPetProject
                 db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
                 db.SubmitChanges();
             }
-            public static void GetHostNameFromHosts(int id)
+            public static void LookUpHostNameFromHosts(int id)
             {
-                //наполнить
+                //наполнить через хранимую процедуру  GetHostNameFromHosts
             }
             public static void GetPhysLocationHostFromHosts(int id)
             {
@@ -73,8 +73,7 @@ namespace PingerPetProject
             {
                 //наполнить
             }
-        }
- 
+        } 
         class Host
         {
             private string physLocationHost = default;
@@ -160,10 +159,19 @@ namespace PingerPetProject
             ManagePingerDataBase.InsertDataInHosts("t1", "t2");
             ManagePingerDataBase.InsertDataInHosts("t1", "t2");
             ManagePingerDataBase.InsertDataInHosts("t1", "t2");
+            ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
+            ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
+            ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
+            ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
+            ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
+            ManagePingerDataBase.InsertDataInCheckingHosts(3, true);
+            ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
+            ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
+
             Console.WriteLine(Hosts.ToString());
             Console.WriteLine();
             ConsoleCheckDataInDataBase();
-            var subset = from s in Hosts where 
+           // var subset = from string s in Hosts where 
         }
 
         private void CheckingNetConnetions()
@@ -180,6 +188,7 @@ namespace PingerPetProject
             Console.WriteLine();
             foreach (var checkinghost in CheckingHosts)
             { Console.WriteLine("{0} \t{1} \t{2}", checkinghost.iteration_num, checkinghost.hostID, checkinghost.hostStatus); }
+            
         }
     }
     
