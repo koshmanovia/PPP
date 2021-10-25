@@ -45,7 +45,7 @@ namespace PingerPetProject
         private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();   
         private static class ManagePingerDataBase
         {
-            #region Открытие и закрытие подключения к БД
+            #region методы открытия и закрытия подключения к БД
             private static SqlConnection _sqlConnection = null;
             private static void OpenConnection()
             {
@@ -60,24 +60,27 @@ namespace PingerPetProject
                 }
             }
             #endregion
+            static SqlConnection connect = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\AppData\Host.mdf;Integrated Security=True");
             public static void InsertDataInHosts(string _hostName, string _physLocationHost)
             {
-                Hosts host = new Hosts { hostName = _hostName, physLocationHost = _physLocationHost };
-                db.GetTable<Hosts>().InsertOnSubmit(host);
-                db.SubmitChanges();
+                SqlCommand command = new SqlCommand("INSERT INTO Hosts VALUES(@hostName, @physLocationHost)", connect);
+                command.Parameters.AddWithValue("@hostName", _hostName);
+                command.Parameters.AddWithValue("@physLocationHost", _physLocationHost);
+                command.Connection.Open();
+                command.ExecuteNonQuery();
+                command.Connection.Close();
             } 
-            public static void InsertDataInCheckingHosts(int hostID, bool hostStatus)
+            public static void InsertDataInCheckingHosts(int _hostID, bool _hostStatus)
             {
-                //вносит изменения в table но не вносит в sql
-                CheckingHosts checkinghosts = new CheckingHosts { hostID = hostID, hostStatus = hostStatus };
-                db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
-                db.SubmitChanges();
+                SqlCommand command = new SqlCommand("INSERT INTO CheckingHosts VALUES(@hostID, @hostStatus)", connect);
+                command.Parameters.AddWithValue("@hostID", _hostID);
+                command.Parameters.AddWithValue("@hostStatus", _hostStatus);
+                command.Connection.Open();
+                command.ExecuteNonQuery();
+                command.Connection.Close();
             }
             public static string LookUpHostNameFromHosts(int hostID)
             {
-                //работает
-                //var _sqlConnection = new SqlConnection { ConnectionString = connectionString };
-                //_sqlConnection.Open();
                 OpenConnection();
                 string hostName;
                 // Установить имя хранимой процедуры.
@@ -106,8 +109,7 @@ namespace PingerPetProject
                     command.ExecuteNonQuery();
                     // Возвратить выходной параметр.
                     hostName = (string)command.Parameters["@hostName"].Value;                  
-                }
-                //_sqlConnection.Close();
+                }               
                 CloseConnection();
                 return hostName;
             }
@@ -205,10 +207,10 @@ namespace PingerPetProject
 
         public void TestGetDataFromHosts(int idInDataBase)
         {
-            ManagePingerDataBase.InsertDataInHosts("t1", "t2");
-            ManagePingerDataBase.InsertDataInHosts("t1", "t2");
-            ManagePingerDataBase.InsertDataInHosts("t1", "t2");
-            ManagePingerDataBase.InsertDataInHosts("t1", "t2");
+            ManagePingerDataBase.InsertDataInHosts("t1", "t1");
+            ManagePingerDataBase.InsertDataInHosts("t2", "t2");
+            ManagePingerDataBase.InsertDataInHosts("t3", "t3");
+            ManagePingerDataBase.InsertDataInHosts("t4", "t4");
             ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
             ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
             ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
@@ -219,10 +221,17 @@ namespace PingerPetProject
             ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
             string s = ManagePingerDataBase.LookUpHostNameFromHosts(0);
             Console.WriteLine(s);
+            s = ManagePingerDataBase.LookUpHostNameFromHosts(1);
+            Console.WriteLine(s);
+            s = ManagePingerDataBase.LookUpHostNameFromHosts(2);
+            Console.WriteLine(s);
+            s = ManagePingerDataBase.LookUpHostNameFromHosts(3);
+            Console.WriteLine(s);
+            s = ManagePingerDataBase.LookUpHostNameFromHosts(4);
+            Console.WriteLine(s);
             Console.WriteLine(Hosts.ToString());
             Console.WriteLine();
             ConsoleCheckDataInDataBase();
-           // var subset = from string s in Hosts where 
         }
 
         private void CheckingNetConnetions()
