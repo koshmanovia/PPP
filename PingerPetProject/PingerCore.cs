@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Linq;
 using System.Data.Linq.Mapping;
 using System.Data.SqlClient;
@@ -57,15 +58,46 @@ namespace PingerPetProject
                 db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
                 db.SubmitChanges();
             }
-            public static void LookUpHostNameFromHosts(int id)
+            public static string LookUpHostNameFromHosts(int hostID)
             {
-                //наполнить через хранимую процедуру  GetHostNameFromHosts
+                var _sqlConnection = new SqlConnection { ConnectionString = connectionString };
+                _sqlConnection.Open();
+                string hostName;
+                // Установить имя хранимой процедуры.
+                using (SqlCommand command = new SqlCommand("GetHostNameFromHosts", _sqlConnection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    // Входной параметр.
+                    SqlParameter param = new SqlParameter
+                    {
+                        ParameterName = "@hostID",
+                        SqlDbType = SqlDbType.Int,
+                        Value = hostID,
+                        Direction = ParameterDirection.Input
+                    };
+                    command.Parameters.Add(param);
+                    // Выходной параметр,
+                    param = new SqlParameter
+                    {
+                        ParameterName = "@hostName",
+                        SqlDbType = SqlDbType.Char,
+                        Size = 10,
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(param);
+                    // Выполнить хранимую процедуру,
+                    command.ExecuteNonQuery();
+                    // Возвратить выходной параметр.
+                    hostName = (string)command.Parameters["@hostName"].Value;                  
+                }
+                //_sqlConnection.Close();
+                return hostName;
             }
-            public static void GetPhysLocationHostFromHosts(int id)
+            public static void GetPhysLocationHostFromHosts(int hostID)
             {
                //наполнить
             }
-            public static void GetAllPingFromCheckingHosts(int id)
+            public static void GetAllPingFromCheckingHosts(int hostID)
             {
                 //наполнить
             }
@@ -167,7 +199,8 @@ namespace PingerPetProject
             ManagePingerDataBase.InsertDataInCheckingHosts(3, true);
             ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
             ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
-
+            //string s = ManagePingerDataBase.LookUpHostNameFromHosts(0);
+            //Console.WriteLine(s);
             Console.WriteLine(Hosts.ToString());
             Console.WriteLine();
             ConsoleCheckDataInDataBase();
