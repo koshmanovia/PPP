@@ -42,10 +42,24 @@ namespace PingerPetProject
         private static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\AppData\Host.mdf;Integrated Security=True";
         private static DataContext db = new DataContext(connectionString);
         private Table<Hosts> Hosts = db.GetTable<Hosts>();
-        private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();
-
+        private Table<CheckingHosts> CheckingHosts = db.GetTable<CheckingHosts>();   
         private static class ManagePingerDataBase
         {
+            #region Открытие и закрытие подключения к БД
+            private static SqlConnection _sqlConnection = null;
+            private static void OpenConnection()
+            {
+                _sqlConnection = new SqlConnection { ConnectionString = connectionString };
+                _sqlConnection.Open();
+            }
+            private static void CloseConnection()
+            {
+                if (_sqlConnection?.State != ConnectionState.Closed)
+                {
+                    _sqlConnection?.Close();
+                }
+            }
+            #endregion
             public static void InsertDataInHosts(string _hostName, string _physLocationHost)
             {
                 Hosts host = new Hosts { hostName = _hostName, physLocationHost = _physLocationHost };
@@ -54,14 +68,17 @@ namespace PingerPetProject
             } 
             public static void InsertDataInCheckingHosts(int hostID, bool hostStatus)
             {
+                //вносит изменения в table но не вносит в sql
                 CheckingHosts checkinghosts = new CheckingHosts { hostID = hostID, hostStatus = hostStatus };
                 db.GetTable<CheckingHosts>().InsertOnSubmit(checkinghosts);
                 db.SubmitChanges();
             }
             public static string LookUpHostNameFromHosts(int hostID)
             {
-                var _sqlConnection = new SqlConnection { ConnectionString = connectionString };
-                _sqlConnection.Open();
+                //работает
+                //var _sqlConnection = new SqlConnection { ConnectionString = connectionString };
+                //_sqlConnection.Open();
+                OpenConnection();
                 string hostName;
                 // Установить имя хранимой процедуры.
                 using (SqlCommand command = new SqlCommand("GetHostNameFromHosts", _sqlConnection))
@@ -91,6 +108,7 @@ namespace PingerPetProject
                     hostName = (string)command.Parameters["@hostName"].Value;                  
                 }
                 //_sqlConnection.Close();
+                CloseConnection();
                 return hostName;
             }
             public static void GetPhysLocationHostFromHosts(int hostID)
@@ -199,8 +217,8 @@ namespace PingerPetProject
             ManagePingerDataBase.InsertDataInCheckingHosts(3, true);
             ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
             ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
-            //string s = ManagePingerDataBase.LookUpHostNameFromHosts(0);
-            //Console.WriteLine(s);
+            string s = ManagePingerDataBase.LookUpHostNameFromHosts(0);
+            Console.WriteLine(s);
             Console.WriteLine(Hosts.ToString());
             Console.WriteLine();
             ConsoleCheckDataInDataBase();
@@ -223,6 +241,7 @@ namespace PingerPetProject
             { Console.WriteLine("{0} \t{1} \t{2}", checkinghost.iteration_num, checkinghost.hostID, checkinghost.hostStatus); }
             
         }
+      
     }
-    
+
 }
