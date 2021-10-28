@@ -101,7 +101,7 @@ namespace PingerPetProject
                     {
                         ParameterName = "@hostName",
                         SqlDbType = SqlDbType.Char,
-                        Size = 10,
+                        Size = 32,
                         Direction = ParameterDirection.Output
                     };
                     command.Parameters.Add(param);
@@ -135,7 +135,7 @@ namespace PingerPetProject
                     {
                         ParameterName = "@physLocationHost",
                         SqlDbType = SqlDbType.Char,
-                        Size = 10,
+                        Size = 32,
                         Direction = ParameterDirection.Output
                     };
                     command.Parameters.Add(param);
@@ -158,13 +158,14 @@ namespace PingerPetProject
         } 
         class Host
         {
-            private string physLocationHost = default;
-            private string hostName = default;
-            private string ipAddress = default;
-            private bool positivePing = default;
-            private long roadTrip = default;
-            private int quallity = default;
-            private int idInDataBase = default;
+            private string physLocationHost = default;//+
+            private string hostName = default;//+
+            private int idInDataBase = default;//-
+            private string ipAddress = default;//-
+            private bool positivePing = default;//??
+            private long roadTrip = default;//-
+            private int quallity = default;//-
+
             public string HostName
             {
                 get
@@ -179,8 +180,14 @@ namespace PingerPetProject
             }
             public string PhysLocationHost
             {
-                get;//получение расположения из базы данных
-                set;//ввод расположения в базу данных
+                get
+                {
+                    return hostName = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(idInDataBase);
+                } //получение расположения из базы данных
+                set
+                {
+                    physLocationHost = PhysLocationHost;
+                } //ввод расположения в базу данных
             }
             private Ping Pinger = new Ping();
             private PingOptions options = new PingOptions(128, dontFragment: true);//перенести в конструкторы управление ttl
@@ -233,7 +240,7 @@ namespace PingerPetProject
                 } 
             }
         }
-
+        #region тестовая процедура
         public void TestGetDataFromHosts(int idInDataBase)
         {
             ManagePingerDataBase.InsertDataInHosts("t1", "t11");
@@ -268,10 +275,10 @@ namespace PingerPetProject
             Console.WriteLine(s);
             s = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(0);
             Console.WriteLine(s);
-            Console.WriteLine(Hosts.ToString());
             Console.WriteLine();
             ConsoleCheckDataInDataBase();
         }
+        #endregion
         private void CheckingNetConnetions()
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
