@@ -147,9 +147,40 @@ namespace PingerPetProject
                 CloseConnection();
                 return physLocationHost;
             }
-            public static void GetAllPingFromCheckingHosts(int hostID)
+            public static int LookUpAllPingFromCheckingHosts(int hostID)
             {
-                //наполнить
+                OpenConnection();
+                int AllNumPing;
+                int quallity = default;
+                // Установить имя хранимой процедуры.
+                using (SqlCommand command = new SqlCommand("GetAllPingFromCheckingHosts", _sqlConnection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    // Входной параметр.
+                    SqlParameter param = new SqlParameter
+                    {
+                        ParameterName = "@hostID",
+                        SqlDbType = SqlDbType.Int,
+                        Value = hostID,
+                        Direction = ParameterDirection.Input
+                    };
+                    command.Parameters.Add(param);
+                    // Выходной параметр,
+                    param = new SqlParameter
+                    {
+                        ParameterName = "@quallity",
+                        SqlDbType = SqlDbType.Int,
+                        Value = quallity,
+                        Direction = ParameterDirection.Output
+                    };
+                    command.Parameters.Add(param);
+                    //Выполнить хранимую процедуру,
+                    command.ExecuteNonQuery();
+                    // Возвратить выходной параметр.
+                    AllNumPing = (int)command.Parameters["@quallity"].Value;
+                }
+                CloseConnection();
+                return AllNumPing;
             }
             public static void GetPositivePingFromCheckingHosts(int hostID)
             {
@@ -275,6 +306,9 @@ namespace PingerPetProject
             Console.WriteLine(s);
             s = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(0);
             Console.WriteLine(s);
+            int i = 1;
+            i = ManagePingerDataBase.LookUpAllPingFromCheckingHosts(1);
+            Console.WriteLine(i);
             Console.WriteLine();
             ConsoleCheckDataInDataBase();
         }
