@@ -17,3 +17,4 @@ C:\Users\k0shm\source\repos\PPP\PingerPetProject\bin\Debug\AppData\Host_log.ldf
 C:\MyProg\VS\projects\PPP\PingerPetProject\bin\Debug\AppData\Host.mdf
 C:\MyProg\VS\projects\PPP\PingerPetProject\bin\Debug\AppData\Host_log.ldf
 C:\Users\k0shm\source\repos\PPP\PingerPetProject\obj\Debug\PingerPetProject.csproj.SuggestedBindingRedirects.cache
+C:\MyProg\VS\projects\PPP\PingerPetProject\obj\Debug\PingerPetProject.csproj.SuggestedBindingRedirects.cache

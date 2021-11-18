@@ -148,10 +148,7 @@ namespace PingerPetProject
                 return physLocationHost;
             }
             public static int LookUpAllPingFromCheckingHosts(int hostID)
-            {
-                //OpenConnection();                
-                //SqlCommand cmd = new SqlCommand();
-                //cmd.Connection = connect;                
+            {               
                 SqlConnection con;
                 con = new SqlConnection();
                 con.ConnectionString = connectionString;
@@ -166,41 +163,6 @@ namespace PingerPetProject
                 con.Close();
                 return intResult;
             }
-            //public static int LookUpAllPingFromCheckingHosts(int hostID)
-            //{
-            //    OpenConnection();
-            //    int AllNumPing;
-            //    int quallity = default;
-            //    // Установить имя хранимой процедуры.
-            //    using (SqlCommand command = new SqlCommand("GetAllPingFromCheckingHosts", _sqlConnection))
-            //    {
-            //        command.CommandType = CommandType.StoredProcedure;
-            //        // Входной параметр.
-            //        SqlParameter param = new SqlParameter
-            //        {
-            //            ParameterName = "@hostID",
-            //            SqlDbType = SqlDbType.Int,
-            //            Value = hostID,
-            //            Direction = ParameterDirection.Input
-            //        };
-            //        command.Parameters.Add(param);
-            //        // Выходной параметр,
-            //        param = new SqlParameter
-            //        {
-            //            ParameterName = "@quallity",
-            //            SqlDbType = SqlDbType.Int,
-            //            Value = quallity,
-            //            Direction = ParameterDirection.Output
-            //        };
-            //        command.Parameters.Add(param);
-            //        //Выполнить хранимую процедуру,
-            //        command.ExecuteNonQuery();
-            //        // Возвратить выходной параметр.
-            //        AllNumPing = (int)command.Parameters["@quallity"].Value;
-            //    }
-            //    CloseConnection();
-            //    return AllNumPing;
-            //}
             public static int LookUpPositivePingFromCheckingHosts(int hostID)
             {
                 SqlConnection con;
@@ -218,6 +180,11 @@ namespace PingerPetProject
                 con.Close();
                 return intResult;
             }
+            public static int QuallityOnHostId(int hostId)
+            {                
+                int intResult = (ManagePingerDataBase.LookUpPositivePingFromCheckingHosts(1) * 100) / ManagePingerDataBase.LookUpAllPingFromCheckingHosts(1);
+                return intResult;
+            }
         } 
         class Host
         {
@@ -228,7 +195,14 @@ namespace PingerPetProject
             private bool positivePing = default;//??
             private long roadTrip = default;//-
             private int quallity = default;//-
-
+            public int Quallity 
+            {
+                get
+                {                    
+                    return ManagePingerDataBase.QuallityOnHostId(idInDataBase);
+                }
+            }
+            
             public string HostName
             {
                 get
@@ -306,59 +280,38 @@ namespace PingerPetProject
         #region тестовая процедура
         public void TestGetDataFromHosts(int idInDataBase)
         {
-            ManagePingerDataBase.InsertDataInHosts("t1", "t11");
-            ManagePingerDataBase.InsertDataInHosts("t2", "t22");
-            ManagePingerDataBase.InsertDataInHosts("t3", "t33");
-            ManagePingerDataBase.InsertDataInHosts("t4", "t44");
-            ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
-            ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
-            ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
-            ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
-            ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
-            ManagePingerDataBase.InsertDataInCheckingHosts(3, true);
-            ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
-            ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
-            for (int j = 0; j <18921; j++)
-            {
-                if (j < 5432)
-                {
-                    ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
-                }
-                else
-                {
-                    ManagePingerDataBase.InsertDataInCheckingHosts(1, false);
-                }
-            }
-            //string s = ManagePingerDataBase.LookUpHostNameFromHosts(0);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpHostNameFromHosts(1);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpHostNameFromHosts(2);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpHostNameFromHosts(3);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpHostNameFromHosts(4);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(4);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(3);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(2);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(1);
-            //Console.WriteLine(s);
-            //s = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(0);
-            //Console.WriteLine(s);
-            int i = default;
+            //ManagePingerDataBase.InsertDataInHosts("t1", "t11");
+            //ManagePingerDataBase.InsertDataInHosts("t2", "t22");
+            //ManagePingerDataBase.InsertDataInHosts("t3", "t33");
+            //ManagePingerDataBase.InsertDataInHosts("t4", "t44");
+            //ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
+            //ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
+            //ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
+            //ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
+            //ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
+            //ManagePingerDataBase.InsertDataInCheckingHosts(3, true);
+            //ManagePingerDataBase.InsertDataInCheckingHosts(2, true);
+            //ManagePingerDataBase.InsertDataInCheckingHosts(0, true);
+            //for (int j = 0; j < 2160; j++)
+            //{
+            //    if (j < 812)
+            //    {
+            //        ManagePingerDataBase.InsertDataInCheckingHosts(1, true);
+            //    }
+            //    else
+            //    {
+            //        ManagePingerDataBase.InsertDataInCheckingHosts(1, false);
+            //    }
+            //}
+            //Console.WriteLine("Input Data completed");
+            //int i = default;
             //i = ManagePingerDataBase.LookUpAllPingFromCheckingHosts(1);
-            i = ManagePingerDataBase.LookUpAllPingFromCheckingHosts(1);
-            Console.WriteLine($"All number ping {i}");
-            i = ManagePingerDataBase.LookUpPositivePingFromCheckingHosts(1);
-            Console.WriteLine($"All number positive ping {i}");
-            double d = (Convert.ToDouble(ManagePingerDataBase.LookUpPositivePingFromCheckingHosts(1))*100) / Convert.ToDouble(ManagePingerDataBase.LookUpAllPingFromCheckingHosts(1));
-            Console.WriteLine($"quality hostId(1) = {d}");
-            Console.WriteLine();
-            //ConsoleCheckDataInDataBase();
+            //Console.WriteLine($"All number ping {i}");
+            //i = ManagePingerDataBase.LookUpPositivePingFromCheckingHosts(1);
+            //Console.WriteLine($"All number positive ping {i}");            
+            //i = ManagePingerDataBase.QuallityOnHostId(1);
+            //Console.WriteLine($"quality hostId(1) = {i}");
+            //Console.WriteLine();            
         }
         #endregion
         private void CheckingNetConnetions()
