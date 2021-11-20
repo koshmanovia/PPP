@@ -182,7 +182,7 @@ namespace PingerPetProject
             }
             public static int QuallityOnHostId(int hostId)
             {                
-                int intResult = (ManagePingerDataBase.LookUpPositivePingFromCheckingHosts(1) * 100) / ManagePingerDataBase.LookUpAllPingFromCheckingHosts(1);
+                int intResult = (ManagePingerDataBase.LookUpPositivePingFromCheckingHosts(hostId) * 100) / ManagePingerDataBase.LookUpAllPingFromCheckingHosts(hostId);
                 return intResult;
             }
         } 
@@ -190,11 +190,12 @@ namespace PingerPetProject
         {
             private string physLocationHost = default;//+
             private string hostName = default;//+
-            private int idInDataBase = default;//-
+            readonly private int idInDataBase = default;//+
             private string ipAddress = default;//-
             private bool positivePing = default;//??
             private long roadTrip = default;//-
-            private int quallity = default;//-
+            private int quallity = default;//+
+            #region работа с переменными
             public int Quallity 
             {
                 get
@@ -209,11 +210,6 @@ namespace PingerPetProject
                 {                    
                     return hostName = ManagePingerDataBase.LookUpHostNameFromHosts(idInDataBase);
                 } //получение имени из базы данных
-                set
-                {
-                    hostName = HostName;
-                } //ввод имени в базу данных
-
             }
             public string PhysLocationHost
             {
@@ -221,11 +217,11 @@ namespace PingerPetProject
                 {
                     return hostName = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(idInDataBase);
                 } //получение расположения из базы данных
-                set
-                {
-                    physLocationHost = PhysLocationHost;
-                } //ввод расположения в базу данных
             }
+            #endregion
+            #region конструкторы
+
+            #endregion
             private Ping Pinger = new Ping();
             private PingOptions options = new PingOptions(128, dontFragment: true);//перенести в конструкторы управление ttl
             private int timeOutHostPing = 3000;//перенести в конструкторы управление временем пинга
@@ -277,7 +273,7 @@ namespace PingerPetProject
                 } 
             }
         }
-        #region тестовая процедура
+ #region тестовая процедура
         public void TestGetDataFromHosts(int idInDataBase)
         {
             //ManagePingerDataBase.InsertDataInHosts("t1", "t11");
@@ -313,7 +309,7 @@ namespace PingerPetProject
             //Console.WriteLine($"quality hostId(1) = {i}");
             //Console.WriteLine();            
         }
-        #endregion
+ #endregion
         private void CheckingNetConnetions()
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
