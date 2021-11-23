@@ -188,13 +188,11 @@ namespace PingerPetProject
         } 
         class Host
         {
-            private string physLocationHost = default;//+
-            private string hostName = default;//+
-            readonly private int idInDataBase = default;//+
-            private string ipAddress = default;//-
-            private bool positivePing = default;//??
-            private long roadTrip = default;//-
-            private int quallity = default;//+
+            readonly private int idInDataBase = default;//передается через конструктор
+            private string ipAddress = default;//вычисляется в пинге           
+            private long roadTrip = default;//вычисляется в пинге
+            private int timeOutHostPing = 3000;//стандартное значение времени пинга 
+            private int TTL = 128; //стандартное время жизни пакета пинга
             #region работа с переменными
             public int Quallity 
             {
@@ -208,14 +206,14 @@ namespace PingerPetProject
             {
                 get
                 {                    
-                    return hostName = ManagePingerDataBase.LookUpHostNameFromHosts(idInDataBase);
-                } //получение имени из базы данных
+                    return ManagePingerDataBase.LookUpHostNameFromHosts(idInDataBase);
+                }
             }
             public string PhysLocationHost
             {
                 get
                 {
-                    return hostName = ManagePingerDataBase.LookUpPhysLocationHostFromHosts(idInDataBase);
+                    return ManagePingerDataBase.LookUpPhysLocationHostFromHosts(idInDataBase);
                 } //получение расположения из базы данных
             }
             #endregion
@@ -223,11 +221,9 @@ namespace PingerPetProject
 
             #endregion
             private Ping Pinger = new Ping();
-            private PingOptions options = new PingOptions(128, dontFragment: true);//перенести в конструкторы управление ttl
-            private int timeOutHostPing = 3000;//перенести в конструкторы управление временем пинга
-            
+            private PingOptions options = new PingOptions(128, dontFragment: true);//перенести в конструкторы управление ttl           
             private Thread threadForPing = default;
-            //сделать нормальный конструктор
+            
             public void Ping()
             {
                 try
@@ -242,7 +238,7 @@ namespace PingerPetProject
                         try
                         {
                             ipAddress = replyInputDataHost.Address.ToString();
-                            positivePing = true;
+                            ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, true);
                             if (replyInputDataHost.RoundtripTime == 0)
                             {
                                 roadTrip = replyInputDataHost.RoundtripTime + 1;
@@ -254,17 +250,20 @@ namespace PingerPetProject
                         }
                         catch (NullReferenceException)
                         {
+                            ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, false);
                             ipAddress = "not available";
                         }
                     }
                 }
                 catch (PingException)
                 {
+                    ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, false);
                     ipAddress = "HOST NAME ERROR!";
 
                 }
                 catch (ArgumentException)
                 {
+                    ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, false);
                     ipAddress = "HOST NAME ERROR!";
                 }
                 finally
