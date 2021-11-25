@@ -192,7 +192,8 @@ namespace PingerPetProject
             private string ipAddress = default;//вычисляется в пинге           
             private long roadTrip = default;//вычисляется в пинге
             private int timeOutHostPing = 3000;//стандартное значение времени пинга 
-            private int TTL = 128; //стандартное время жизни пакета пинга
+            private static int TTL = 128; //стандартное время жизни пакета пинга
+            private bool checkHost = false;
             #region работа с переменными
             public int Quallity 
             {
@@ -221,7 +222,7 @@ namespace PingerPetProject
 
             #endregion
             private Ping Pinger = new Ping();
-            private PingOptions options = new PingOptions(128, dontFragment: true);//перенести в конструкторы управление ttl           
+            private PingOptions options = new PingOptions(TTL, dontFragment: true);//перенести в конструкторы управление ttl           
             private Thread threadForPing = default;
             
             public void Ping()
@@ -232,13 +233,13 @@ namespace PingerPetProject
                     if (replyInputDataHost.Status != IPStatus.Success)
                     {
                         ipAddress = "not available";
+                        roadTrip = 0;
                     }
                     else
                     {
                         try
                         {
                             ipAddress = replyInputDataHost.Address.ToString();
-                            ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, true);
                             if (replyInputDataHost.RoundtripTime == 0)
                             {
                                 roadTrip = replyInputDataHost.RoundtripTime + 1;
@@ -249,26 +250,26 @@ namespace PingerPetProject
                             }
                         }
                         catch (NullReferenceException)
-                        {
-                            ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, false);
+                        {                            
                             ipAddress = "not available";
+                            roadTrip = 0;
                         }
                     }
                 }
                 catch (PingException)
-                {
-                    ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, false);
+                {                   
                     ipAddress = "HOST NAME ERROR!";
+                    roadTrip = 0;
 
                 }
                 catch (ArgumentException)
-                {
-                    ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, false);
+                {                    
                     ipAddress = "HOST NAME ERROR!";
+                    roadTrip = 0;
                 }
                 finally
                 {
-                    //(ipAddress, positivePing, tempRoadTrip);
+                    ManagePingerDataBase.InsertDataInCheckingHosts(idInDataBase, checkHost);
                 } 
             }
         }
